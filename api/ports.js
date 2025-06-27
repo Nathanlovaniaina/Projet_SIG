@@ -15,34 +15,63 @@ const pool = new Pool({
 });
 
 // Route API pour récupérer les ports
-app.get('/ports', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT jsonb_build_object(
-        'type', 'FeatureCollection',
-        'features', jsonb_agg(
-          jsonb_build_object(
-            'type', 'Feature',
-            'geometry', ST_AsGeoJSON(geom)::jsonb,
-            'properties', jsonb_build_object(
-              'id', id,
-              'nom', nom
-            )
-          )
-        )
-      ) AS geojson
-      FROM ports;
-    `);
+app.get('/ports', (req, res) => {
+  pool.query(
+    `SELECT id, nom, region, type_port, capacite, description, photo, superficie, profondeur, gestionnaire, 
+     ST_X(geom) as longitude, ST_Y(geom) as latitude FROM ports`,
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Erreur serveur' });
+      }
 
-    res.json(result.rows[0].geojson); // <- renvoyer le GeoJSON directement
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erreur serveur');
-  }
+      const geojson = {
+        type: "FeatureCollection",
+        features: result.rows.map(port => ({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [port.longitude, port.latitude]
+          },
+          properties: {
+            id: port.id,
+            nom: port.nom,
+            region: port.region,
+            type_port: port.type_port,
+            capacite: port.capacite,
+            description: port.description,
+            photo: port.photo,
+            superficie: port.superficie,
+            profondeur: port.profondeur,
+            gestionnaire: port.gestionnaire,
+            latitude: port.latitude,
+            longitude: port.longitude
+          }
+        }))
+      };
+
+      res.json(geojson);
+    }
+  );
 });
 
+// Nouvelle route API pour récupérer les régions distinctes
+app.get('/regions', (req, res) => {
+  pool.query(
+    `SELECT DISTINCT region FROM ports ORDER BY region`,
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Erreur serveur' });
+      }
+      // Extraire les régions en tableau simple
+      const regions = result.rows.map(row => row.region);
+      res.json(regions);
+    }
+  );
+});
 
 // Lancement du serveur
 app.listen(3000, () => {
-  console.log('API disponible sur http://localhost:3000/ports');
+  console.log('API disponible sur http://localhost:3000');
 });

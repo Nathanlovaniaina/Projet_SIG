@@ -1,15 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <title>Ports de Madagascar</title>
+  <meta charset="UTF-8" />
+  <title>Carte des ports de Madagascar</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 600px; }
+    body { margin: 0; display: flex; height: 100vh; font-family: Arial, sans-serif; }
+    #map { flex: 1; }
+    #sidebar {
+      width: 320px; padding: 10px; background: #f4f4f4; overflow-y: auto;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    label { display: block; margin-top: 10px; }
+    input, select { width: 100%; padding: 5px; margin-top: 5px; }
+    #info {
+      margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px;
+    }
+    #info img { max-width: 100%; height: auto; }
+    #routes, #zones { margin-top: 10px; }
   </style>
 </head>
 <body>
 
-<h1>Ports de Madagascar</h1>
+<div id="sidebar">
+  <h2>Filtres & Recherche</h2>
+
+  <label for="regionSelect">Région :</label>
+<select id="regionSelect">
+  <option value="">Toutes</option>
+</select>
+
+  <label for="typeSelect">Type de port :</label>
+  <select id="typeSelect">
+    <option value="">Tous</option>
+    <option value="Commercial">Commercial</option>
+    <option value="Peche">Pêche</option>
+    <option value="Militaire">Militaire</option>
+  </select>
+
+  <label for="capacityInput">Capacité min (tonnes) :</label>
+  <input id="capacityInput" type="number" min="0" placeholder="0" />
+
+  <label for="searchInput">Recherche (nom ou ville) :</label>
+  <input id="searchInput" type="text" placeholder="Recherche..." />
+
+  <div id="info">
+    <h3>Détails du port</h3>
+    <div id="portDetails">Cliquez sur un port pour voir les détails.</div>
+  </div>
+</div>
+
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
