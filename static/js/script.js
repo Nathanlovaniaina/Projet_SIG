@@ -71,6 +71,9 @@ function afficherPorts(data) {
 }
 
 // Affichage détails dans panneau latéral
+let routingControl = null;  // Stocke le contrôle Leaflet Routing Machine
+
+// Modifier afficherDetails pour ajouter un bouton "Itinéraire"
 function afficherDetails(props) {
   portDetails.innerHTML = `
     <h4>${props.nom}</h4>
@@ -82,6 +85,8 @@ function afficherDetails(props) {
     <p><strong>Capacité :</strong> ${props.capacite || 'N/A'} tonnes</p>
     <p><strong>Gestionnaire :</strong> ${props.gestionnaire || 'N/A'}</p>
     <p><strong>Coordonnées :</strong> ${props.latitude.toFixed(5)}, ${props.longitude.toFixed(5)}</p>
+    <button id="btnItineraire">Itinéraire vers ce port</button>
+    <div id="itineraireInfo" style="margin-top:10px; font-weight:bold;"></div>
   `;
 
   if (props.latitude && props.longitude) {
@@ -89,7 +94,69 @@ function afficherDetails(props) {
   }
 
   afficherZonesEtRoutes(props);
+
+  // Nettoyer ancien itinéraire et info
+  if (routingControl) {
+    map.removeControl(routingControl);
+    routingControl = null;
+  }
+  document.getElementById('itineraireInfo').innerHTML = '';
+
+  // Écouteur sur bouton itinéraire
+  document.getElementById('btnItineraire').addEventListener('click', () => {
+    calculerItineraire(props.latitude, props.longitude);
+  });
 }
+
+// Fonction calculant et affichant l'itinéraire
+function calculerItineraire(latPort, lonPort) {
+  const infoDiv = document.getElementById('itineraireInfo');
+  infoDiv.innerHTML = "Calcul de l'itinéraire...";
+
+  if (!navigator.geolocation) {
+    infoDiv.innerHTML = "Géolocalisation non supportée par ce navigateur.";
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(position => {
+    const userLat = position.coords.latitude;
+    const userLon = position.coords.longitude;
+
+    // Supprimer ancien itinéraire
+    if (routingControl) {
+      map.removeControl(routingControl);
+    }
+
+    routingControl = L.Routing.control({
+      waypoints: [
+        L.latLng(userLat, userLon),
+        L.latLng(latPort, lonPort)
+      ],
+      routeWhileDragging: false,
+      showAlternatives: false,
+      addWaypoints: false,
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
+      lineOptions: { styles: [{color: '#4169E1', opacity: 0.8, weight: 6}] },
+      createMarker: (i, wp) => L.marker(wp.latLng), // marqueurs par défaut
+      formatter: new L.Routing.Formatter({ language: 'fr', unit: 'metric' })
+    }).addTo(map);
+
+    routingControl.on('routesfound', e => {
+      const summary = e.routes[0].summary;
+      const distKm = (summary.totalDistance / 1000).toFixed(2);
+      const durationMin = Math.ceil(summary.totalTime / 60);
+      infoDiv.innerHTML = `Distance : ${distKm} km<br>Durée estimée : ${durationMin} min`;
+    });
+
+    routingControl.on('routingerror', () => {
+      infoDiv.innerHTML = "Erreur lors du calcul de l'itinéraire.";
+    });
+  }, () => {
+    infoDiv.innerHTML = "Impossible de récupérer votre position.";
+  });
+}
+
 
 // Exemple zones et routes fictives
 function afficherZonesEtRoutes(props) {
