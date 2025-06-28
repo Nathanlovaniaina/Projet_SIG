@@ -6,6 +6,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let portsData = null;
 let geojsonLayer = null;
 
+const image_path = "static/img/"
 const regionSelect = document.getElementById('regionSelect');
 const typeSelect = document.getElementById('typeSelect');
 const capacityInput = document.getElementById('capacityInput');
@@ -33,6 +34,11 @@ fetch('http://localhost:3000/regions')
     });
   })
   .catch(console.error);
+
+
+function decodeLatin1(str) {
+  return decodeURIComponent(escape(str));
+}
 
 
 // Fonction pour normaliser texte sans accents
@@ -75,9 +81,14 @@ let routingControl = null;  // Stocke le contrôle Leaflet Routing Machine
 
 // Modifier afficherDetails pour ajouter un bouton "Itinéraire"
 function afficherDetails(props) {
+  const photoUrl = props.photo
+    ? `${image_path}${props.photo}`
+    : "https://via.placeholder.com/300x150?text=Pas+d'image";
+
+
   portDetails.innerHTML = `
     <h4>${props.nom}</h4>
-    <img src="${props.photo || 'https://via.placeholder.com/300x150?text=Pas+d\'image'}" alt="Photo de ${props.nom}" />
+    <img src="${photoUrl}" alt="Photo de ${props.nom}" style="max-width: 100%; height: auto; border-radius: 8px;" />
     <p><strong>Type de port :</strong> ${props.type_port || 'N/A'}</p>
     <p><strong>Description :</strong> ${props.description || 'N/A'}</p>
     <p><strong>Superficie :</strong> ${props.superficie || 'N/A'} ha</p>
@@ -95,18 +106,18 @@ function afficherDetails(props) {
 
   afficherZonesEtRoutes(props);
 
-  // Nettoyer ancien itinéraire et info
   if (routingControl) {
     map.removeControl(routingControl);
     routingControl = null;
   }
+
   document.getElementById('itineraireInfo').innerHTML = '';
 
-  // Écouteur sur bouton itinéraire
   document.getElementById('btnItineraire').addEventListener('click', () => {
     calculerItineraire(props.latitude, props.longitude);
   });
 }
+
 
 // Fonction calculant et affichant l'itinéraire
 function calculerItineraire(latPort, lonPort) {

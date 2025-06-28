@@ -66,6 +66,7 @@ app.get('/regions', (req, res) => {
       }
       // Extraire les régions en tableau simple
       const regions = result.rows.map(row => row.region);
+      
       res.json(regions);
     }
   );
