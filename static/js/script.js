@@ -137,7 +137,7 @@ function calculerItineraire(latPort, lonPort) {
       addWaypoints: false,
       draggableWaypoints: false,
       fitSelectedRoutes: true,
-      lineOptions: { styles: [{color: '#4169E1', opacity: 0.8, weight: 6}] },
+      lineOptions: { styles: [{ color: '#4169E1', opacity: 0.8, weight: 6 }] },
       createMarker: (i, wp) => L.marker(wp.latLng), // marqueurs par défaut
       formatter: new L.Routing.Formatter({ language: 'fr', unit: 'metric' })
     }).addTo(map);
