@@ -5,15 +5,18 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 let portsData = null;
 let geojsonLayer = null;
+let provenancesLayer = null;
+let linesLayer = null;
+let routingControl = null;
 
-const image_path = "static/img/"
+const image_path = "static/img/";
 const regionSelect = document.getElementById('regionSelect');
 const typeSelect = document.getElementById('typeSelect');
 const capacityInput = document.getElementById('capacityInput');
 const searchInput = document.getElementById('searchInput');
 const portDetails = document.getElementById('portDetails');
 
-// Chargement des données depuis l’API
+// Chargement des données depuis l’API ports
 fetch('http://localhost:3000/ports')
   .then(res => res.json())
   .then(data => {
@@ -35,22 +38,29 @@ fetch('http://localhost:3000/regions')
   })
   .catch(console.error);
 
-
-function decodeLatin1(str) {
-  return decodeURIComponent(escape(str));
-}
-
-
-// Fonction pour normaliser texte sans accents
+// Normalisation texte sans accents
 function normalize(str) {
   return str ? str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase() : '';
 }
 
-// Fonction pour filtrer et afficher les ports
+// Filtrer et afficher les ports sur la carte
 function afficherPorts(data) {
   if (geojsonLayer) {
     geojsonLayer.remove();
   }
+  if (provenancesLayer) {
+    provenancesLayer.remove();
+    provenancesLayer = null;
+  }
+  if (linesLayer) {
+    linesLayer.remove();
+    linesLayer = null;
+  }
+  if (routingControl) {
+    map.removeControl(routingControl);
+    routingControl = null;
+  }
+  portDetails.innerHTML = `<div class="detail-item"><div class="detail-icon"><i class="fas fa-anchor"></i></div><div>Cliquez sur un port pour voir les détails.</div></div>`;
 
   const filtered = {
     ...data,
@@ -76,12 +86,9 @@ function afficherPorts(data) {
   }).addTo(map);
 }
 
-// Affichage détails dans panneau latéral
-let routingControl = null;  // Stocke le contrôle Leaflet Routing Machine
-
-// Modifier afficherDetails pour ajouter un bouton "Itinéraire"
+// Affichage des détails dans panneau latéral + boutons itinéraire et affichage provenances
 function afficherDetails(props) {
-    const photoUrl = props.photo
+  const photoUrl = props.photo
     ? `${image_path}${props.photo}`
     : "https://via.placeholder.com/300x150?text=Pas+d'image";
 
@@ -97,28 +104,38 @@ function afficherDetails(props) {
     <p><strong>Coordonnées :</strong> ${props.latitude.toFixed(5)}, ${props.longitude.toFixed(5)}</p>
     <button id="btnItineraire" class="itineraire-btn">Itinéraire vers ce port</button>
     <div id="itineraireInfo" class="itineraire-info"></div>
+    <h4>Provenances</h4>
+    <div id="provenancesInfo" class="itineraire-info">Chargement...</div>
   `;
 
   if (props.latitude && props.longitude) {
-    map.setView([props.latitude, props.longitude], 12);
+    map.setView([props.latitude, props.longitude], 8);
   }
 
-  afficherZonesEtRoutes(props);
-
+  // Supprime anciennes couches provenances et lignes
+  if (provenancesLayer) {
+    provenancesLayer.remove();
+    provenancesLayer = null;
+  }
+  if (linesLayer) {
+    linesLayer.remove();
+    linesLayer = null;
+  }
   if (routingControl) {
     map.removeControl(routingControl);
     routingControl = null;
   }
 
-  document.getElementById('itineraireInfo').innerHTML = '';
-
+  // Bouton itinéraire
   document.getElementById('btnItineraire').addEventListener('click', () => {
     calculerItineraire(props.latitude, props.longitude);
   });
+
+  // Charge les provenances du port
+  afficherProvenances(props.id);
 }
 
-
-// Fonction calculant et affichant l'itinéraire
+// Calcul et affichage itinéraire entre position user et port
 function calculerItineraire(latPort, lonPort) {
   const infoDiv = document.getElementById('itineraireInfo');
   infoDiv.innerHTML = "Calcul de l'itinéraire...";
@@ -132,7 +149,6 @@ function calculerItineraire(latPort, lonPort) {
     const userLat = position.coords.latitude;
     const userLon = position.coords.longitude;
 
-    // Supprimer ancien itinéraire
     if (routingControl) {
       map.removeControl(routingControl);
     }
@@ -148,7 +164,7 @@ function calculerItineraire(latPort, lonPort) {
       draggableWaypoints: false,
       fitSelectedRoutes: true,
       lineOptions: { styles: [{ color: '#4169E1', opacity: 0.8, weight: 6 }] },
-      createMarker: (i, wp) => L.marker(wp.latLng), // marqueurs par défaut
+      createMarker: (i, wp) => L.marker(wp.latLng),
       formatter: new L.Routing.Formatter({ language: 'fr', unit: 'metric' })
     }).addTo(map);
 
@@ -167,26 +183,88 @@ function calculerItineraire(latPort, lonPort) {
   });
 }
 
+// Affiche les provenances d’un port sélectionné avec marqueurs et lignes de trajet
+function afficherProvenances(idPort) {
+  const provenancesDiv = document.getElementById('provenancesInfo');
+  provenancesDiv.innerHTML = 'Chargement des provenances...';
 
-// Exemple zones et routes fictives
-function afficherZonesEtRoutes(props) {
-  if (window.zonesLayer) map.removeLayer(window.zonesLayer);
-  if (window.routesLayer) map.removeLayer(window.routesLayer);
+  if (provenancesLayer) {
+    provenancesLayer.remove();
+    provenancesLayer = null;
+  }
 
-  const zoneCoords = [
-    [props.latitude + 0.01, props.longitude - 0.01],
-    [props.latitude + 0.01, props.longitude + 0.01],
-    [props.latitude - 0.01, props.longitude + 0.01],
-    [props.latitude - 0.01, props.longitude - 0.01]
-  ];
-  window.zonesLayer = L.polygon(zoneCoords, { color: 'blue', weight: 2, fillOpacity: 0.1 }).addTo(map);
+  if (linesLayer) {
+    linesLayer.remove();
+    linesLayer = null;
+  }
 
+  fetch(`http://localhost:3000/provenances/${idPort}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.provenances || data.provenances.length === 0) {
+        provenancesDiv.innerHTML = 'Aucune provenance enregistrée pour ce port.';
+        return;
+      }
+
+      const listHtml = data.provenances.map(p =>
+        `<b>${p.nom_port_etranger}</b> (${p.pays}) — Marchandise : ${p.marchandise}`
+      ).join('<br>');
+      provenancesDiv.innerHTML = listHtml;
+
+      // Afficher les ports étrangers sur la carte
+      const features = data.provenances.map(p => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [p.longitude, p.latitude]
+        },
+        properties: {
+          nom: p.nom_port_etranger,
+          pays: p.pays,
+          marchandise: p.marchandise
+        }
+      }));
+
+      provenancesLayer = L.geoJSON(features, {
+        pointToLayer: (feature, latlng) => {
+          return L.marker(latlng, {
+            icon: L.icon({
+              iconUrl: 'static/img/port_foreign.png',
+              iconSize: [25, 25],
+              iconAnchor: [12, 25],
+              popupAnchor: [0, -25]
+            })
+          });
+        },
+        onEachFeature: (feature, layer) => {
+          const props = feature.properties;
+          layer.bindPopup(`<b>${props.nom}</b><br>${props.pays}<br>Marchandise: ${props.marchandise}`);
+        }
+      }).addTo(map);
+
+      // Création des lignes entre port sélectionné et ports étrangers
+      const selectedPort = portsData.features.find(f => f.properties.id === idPort);
+      if (selectedPort) {
+        const latLngStart = [selectedPort.properties.latitude, selectedPort.properties.longitude];
+        const lines = data.provenances.map(p => {
+          return L.polyline([latLngStart, [p.latitude, p.longitude]], {
+            color: '#FF5733',
+            weight: 2,
+            opacity: 0.7,
+            dashArray: '5, 10'
+          });
+        });
+        linesLayer = L.layerGroup(lines).addTo(map);
+      }
+    })
+    .catch(err => {
+      console.error("Erreur chargement provenances :", err);
+      provenancesDiv.innerHTML = 'Erreur lors du chargement des provenances.';
+    });
 }
 
-// Écouteurs sur filtres
+// Écouteurs sur filtres pour mise à jour carte
 regionSelect.addEventListener('change', () => afficherPorts(portsData));
 typeSelect.addEventListener('change', () => afficherPorts(portsData));
 capacityInput.addEventListener('input', () => afficherPorts(portsData));
 searchInput.addEventListener('input', () => afficherPorts(portsData));
-
-

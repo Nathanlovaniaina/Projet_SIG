@@ -72,6 +72,35 @@ app.get('/regions', (req, res) => {
   );
 });
 
+// Route API pour récupérer les ports étrangers liés à un port donné (provenances)
+app.get('/provenances/:id_port', (req, res) => {
+  const idPort = parseInt(req.params.id_port, 10);
+
+  if (isNaN(idPort)) {
+    return res.status(400).json({ error: "id_port invalide" });
+  }
+
+  pool.query(
+    `SELECT id_port, marchandise, nom_port_etranger, pays, 
+            ST_X(geom) AS longitude, ST_Y(geom) AS latitude
+     FROM provenances
+     WHERE id_port = $1`,
+    [idPort],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Erreur serveur" });
+      }
+
+      res.json({
+        port_id: idPort,
+        provenances: result.rows
+      });
+    }
+  );
+});
+
+
 // Lancement du serveur
 app.listen(3000, () => {
   console.log('API disponible sur http://localhost:3000');
