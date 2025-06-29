@@ -3,7 +3,11 @@ const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+// ✅ Autoriser les deux origines possibles pour tests locaux
+app.use(cors({
+  origin: ['http://localhost:5500', 'http://127.0.0.1:5500']
+}));
 
 // Connexion à PostgreSQL
 const pool = new Pool({
@@ -55,7 +59,7 @@ app.get('/ports', (req, res) => {
   );
 });
 
-// Nouvelle route API pour récupérer les régions distinctes
+// Route API pour récupérer les régions distinctes
 app.get('/regions', (req, res) => {
   pool.query(
     `SELECT DISTINCT region FROM ports ORDER BY region`,
@@ -64,15 +68,42 @@ app.get('/regions', (req, res) => {
         console.error(err);
         return res.status(500).json({ error: 'Erreur serveur' });
       }
-      // Extraire les régions en tableau simple
+
       const regions = result.rows.map(row => row.region);
-      
       res.json(regions);
     }
   );
 });
 
-// Lancement du serveur
+// Route API pour récupérer les provenances d'un port
+app.get('/provenances/:id_port', (req, res) => {
+  const idPort = parseInt(req.params.id_port, 10);
+
+  if (isNaN(idPort)) {
+    return res.status(400).json({ error: "id_port invalide" });
+  }
+
+  pool.query(
+    `SELECT id_port, marchandise, nom_port_etranger, pays, 
+            ST_X(geom) AS longitude, ST_Y(geom) AS latitude
+     FROM provenances
+     WHERE id_port = $1`,
+    [idPort],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Erreur serveur" });
+      }
+
+      res.json({
+        port_id: idPort,
+        provenances: result.rows
+      });
+    }
+  );
+});
+
+// Lancer le serveur
 app.listen(3000, () => {
-  console.log('API disponible sur http://localhost:3000');
+  console.log('✅ API disponible sur http://localhost:3000');
 });

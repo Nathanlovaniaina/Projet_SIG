@@ -6,11 +6,10 @@
   <title>Carte des ports de Madagascar</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="static/css/style.css">
+  <link rel="stylesheet" href="static/css/style.css" />
 </head>
 
 <body>
-
   <div id="sidebar">
     <div class="form-container">
       <h2>Filtres & Recherche</h2>
@@ -34,6 +33,7 @@
             <option value="Commercial">Commercial</option>
             <option value="Peche">Pêche</option>
             <option value="Militaire">Militaire</option>
+            <option value="Touristique">Touristique</option>
           </select>
         </div>
       </div>
@@ -67,14 +67,11 @@
   </div>
 
   <div id="map"></div>
-  <div id="routeInfo" class="route-info-container"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
   <script src="./static/js/script.js"></script>
-
-
 </body>
 
 </html>
