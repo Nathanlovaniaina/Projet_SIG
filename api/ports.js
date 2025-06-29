@@ -3,7 +3,11 @@ const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+// ✅ Autoriser les deux origines possibles pour tests locaux
+app.use(cors({
+  origin: ['http://localhost:5500', 'http://127.0.0.1:5500']
+}));
 
 // Connexion à PostgreSQL
 const pool = new Pool({
@@ -55,7 +59,7 @@ app.get('/ports', (req, res) => {
   );
 });
 
-// Nouvelle route API pour récupérer les régions distinctes
+// Route API pour récupérer les régions distinctes
 app.get('/regions', (req, res) => {
   pool.query(
     `SELECT DISTINCT region FROM ports ORDER BY region`,
@@ -64,15 +68,14 @@ app.get('/regions', (req, res) => {
         console.error(err);
         return res.status(500).json({ error: 'Erreur serveur' });
       }
-      // Extraire les régions en tableau simple
+
       const regions = result.rows.map(row => row.region);
-      
       res.json(regions);
     }
   );
 });
 
-// Route API pour récupérer les ports étrangers liés à un port donné (provenances)
+// Route API pour récupérer les provenances d'un port
 app.get('/provenances/:id_port', (req, res) => {
   const idPort = parseInt(req.params.id_port, 10);
 
@@ -100,8 +103,7 @@ app.get('/provenances/:id_port', (req, res) => {
   );
 });
 
-
-// Lancement du serveur
+// Lancer le serveur
 app.listen(3000, () => {
-  console.log('API disponible sur http://localhost:3000');
+  console.log('✅ API disponible sur http://localhost:3000');
 });

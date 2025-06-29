@@ -188,14 +188,15 @@ function afficherProvenances(idPort) {
   const provenancesDiv = document.getElementById('provenancesInfo');
   provenancesDiv.innerHTML = 'Chargement des provenances...';
 
-  if (provenancesLayer) {
-    provenancesLayer.remove();
-    provenancesLayer = null;
+  // Supprimer anciens layers s'ils existent
+  if (window.provenancesLayer) {
+    map.removeLayer(window.provenancesLayer);
+    window.provenancesLayer = null;
   }
 
-  if (linesLayer) {
-    linesLayer.remove();
-    linesLayer = null;
+  if (window.linesLayer) {
+    map.removeLayer(window.linesLayer);
+    window.linesLayer = null;
   }
 
   fetch(`http://localhost:3000/provenances/${idPort}`)
@@ -211,6 +212,24 @@ function afficherProvenances(idPort) {
       ).join('<br>');
       provenancesDiv.innerHTML = listHtml;
 
+      // Définir l'icône utilisée pour les ports étrangers
+      const portForeignIcon = L.icon({
+        iconUrl: 'static/img/port_foreign.png',
+        iconSize: [25, 25],
+        iconAnchor: [12, 25],
+        popupAnchor: [0, -25],
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        shadowSize: [41, 41]
+      });
+
+      // Vérification pré-chargement image icône
+      const testImg = new Image();
+      testImg.src = portForeignIcon.options.iconUrl;
+      testImg.onerror = () => {
+        // Si image pas trouvée, remplacer par l'icône Leaflet par défaut
+        portForeignIcon.options.iconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
+      };
+
       // Afficher les ports étrangers sur la carte
       const features = data.provenances.map(p => ({
         type: "Feature",
@@ -225,20 +244,13 @@ function afficherProvenances(idPort) {
         }
       }));
 
-      provenancesLayer = L.geoJSON(features, {
+      window.provenancesLayer = L.geoJSON(features, {
         pointToLayer: (feature, latlng) => {
-          return L.marker(latlng, {
-            icon: L.icon({
-              iconUrl: 'static/img/port_foreign.png',
-              iconSize: [25, 25],
-              iconAnchor: [12, 25],
-              popupAnchor: [0, -25]
-            })
-          });
+          return L.marker(latlng, { icon: portForeignIcon });
         },
         onEachFeature: (feature, layer) => {
           const props = feature.properties;
-          layer.bindPopup(`<b>${props.nom}</b><br>${props.pays}<br>Marchandise: ${props.marchandise}`);
+          layer.bindPopup(`<b>${props.nom}</b><br>${props.pays}<br>Marchandise : ${props.marchandise}`);
         }
       }).addTo(map);
 
@@ -254,7 +266,8 @@ function afficherProvenances(idPort) {
             dashArray: '5, 10'
           });
         });
-        linesLayer = L.layerGroup(lines).addTo(map);
+
+        window.linesLayer = L.layerGroup(lines).addTo(map);
       }
     })
     .catch(err => {
@@ -262,6 +275,7 @@ function afficherProvenances(idPort) {
       provenancesDiv.innerHTML = 'Erreur lors du chargement des provenances.';
     });
 }
+
 
 // Écouteurs sur filtres pour mise à jour carte
 regionSelect.addEventListener('change', () => afficherPorts(portsData));
