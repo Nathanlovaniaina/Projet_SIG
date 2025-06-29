@@ -214,13 +214,14 @@ function afficherProvenances(idPort) {
 
       // Définir l'icône utilisée pour les ports étrangers
       const portForeignIcon = L.icon({
-        iconUrl: 'static/img/port_foreign.png',
-        iconSize: [25, 25],
-        iconAnchor: [12, 25],
-        popupAnchor: [0, -25],
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
         shadowSize: [41, 41]
       });
+
 
       // Vérification pré-chargement image icône
       const testImg = new Image();
