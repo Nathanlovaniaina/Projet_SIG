@@ -6,6 +6,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let portsData = null;
 let geojsonLayer = null;
 
+const image_path = "static/img/"
 const regionSelect = document.getElementById('regionSelect');
 const typeSelect = document.getElementById('typeSelect');
 const capacityInput = document.getElementById('capacityInput');
@@ -33,6 +34,11 @@ fetch('http://localhost:3000/regions')
     });
   })
   .catch(console.error);
+
+
+function decodeLatin1(str) {
+  return decodeURIComponent(escape(str));
+}
 
 
 // Fonction pour normaliser texte sans accents
@@ -75,9 +81,13 @@ let routingControl = null;  // Stocke le contrôle Leaflet Routing Machine
 
 // Modifier afficherDetails pour ajouter un bouton "Itinéraire"
 function afficherDetails(props) {
+    const photoUrl = props.photo
+    ? `${image_path}${props.photo}`
+    : "https://via.placeholder.com/300x150?text=Pas+d'image";
+
   portDetails.innerHTML = `
     <h4>${props.nom}</h4>
-    <img src="${props.photo || 'https://via.placeholder.com/300x150?text=Pas+d\'image'}" alt="Photo de ${props.nom}" />
+    <img src="${photoUrl}" alt="Photo de ${props.nom}" style="max-width: 100%; height: auto; border-radius: 8px;" />
     <p><strong>Type de port :</strong> ${props.type_port || 'N/A'}</p>
     <p><strong>Description :</strong> ${props.description || 'N/A'}</p>
     <p><strong>Superficie :</strong> ${props.superficie || 'N/A'} ha</p>
@@ -85,8 +95,8 @@ function afficherDetails(props) {
     <p><strong>Capacité :</strong> ${props.capacite || 'N/A'} tonnes</p>
     <p><strong>Gestionnaire :</strong> ${props.gestionnaire || 'N/A'}</p>
     <p><strong>Coordonnées :</strong> ${props.latitude.toFixed(5)}, ${props.longitude.toFixed(5)}</p>
-    <button id="btnItineraire">Itinéraire vers ce port</button>
-    <div id="itineraireInfo" style="margin-top:10px; font-weight:bold;"></div>
+    <button id="btnItineraire" class="itineraire-btn">Itinéraire vers ce port</button>
+    <div id="itineraireInfo" class="itineraire-info"></div>
   `;
 
   if (props.latitude && props.longitude) {
@@ -95,18 +105,18 @@ function afficherDetails(props) {
 
   afficherZonesEtRoutes(props);
 
-  // Nettoyer ancien itinéraire et info
   if (routingControl) {
     map.removeControl(routingControl);
     routingControl = null;
   }
+
   document.getElementById('itineraireInfo').innerHTML = '';
 
-  // Écouteur sur bouton itinéraire
   document.getElementById('btnItineraire').addEventListener('click', () => {
     calculerItineraire(props.latitude, props.longitude);
   });
 }
+
 
 // Fonction calculant et affichant l'itinéraire
 function calculerItineraire(latPort, lonPort) {
@@ -137,7 +147,7 @@ function calculerItineraire(latPort, lonPort) {
       addWaypoints: false,
       draggableWaypoints: false,
       fitSelectedRoutes: true,
-      lineOptions: { styles: [{color: '#4169E1', opacity: 0.8, weight: 6}] },
+      lineOptions: { styles: [{ color: '#4169E1', opacity: 0.8, weight: 6 }] },
       createMarker: (i, wp) => L.marker(wp.latLng), // marqueurs par défaut
       formatter: new L.Routing.Formatter({ language: 'fr', unit: 'metric' })
     }).addTo(map);
@@ -183,3 +193,5 @@ regionSelect.addEventListener('change', () => afficherPorts(portsData));
 typeSelect.addEventListener('change', () => afficherPorts(portsData));
 capacityInput.addEventListener('input', () => afficherPorts(portsData));
 searchInput.addEventListener('input', () => afficherPorts(portsData));
+
+

@@ -1,62 +1,80 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8" />
   <title>Carte des ports de Madagascar</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <style>
-    body { margin: 0; display: flex; height: 100vh; font-family: Arial, sans-serif; }
-    #map { flex: 1; }
-    #sidebar {
-      width: 320px; padding: 10px; background: #f4f4f4; overflow-y: auto;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    }
-    label { display: block; margin-top: 10px; }
-    input, select { width: 100%; padding: 5px; margin-top: 5px; }
-    #info {
-      margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px;
-    }
-    #info img { max-width: 100%; height: auto; }
-    #routes, #zones { margin-top: 10px; }
-  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="static/css/style.css">
 </head>
+
 <body>
 
-<div id="sidebar">
-  <h2>Filtres & Recherche</h2>
+  <div id="sidebar">
+    <div class="form-container">
+      <h2>Filtres & Recherche</h2>
 
-  <label for="regionSelect">Région :</label>
-<select id="regionSelect">
-  <option value="">Toutes</option>
-</select>
+      <div class="form-group">
+        <label for="regionSelect">Région :</label>
+        <div class="input-wrapper">
+          <i class="fas fa-map-marked-alt input-icon"></i>
+          <select id="regionSelect">
+            <option value="">Toutes les régions</option>
+          </select>
+        </div>
+      </div>
 
-  <label for="typeSelect">Type de port :</label>
-  <select id="typeSelect">
-    <option value="">Tous</option>
-    <option value="Commercial">Commercial</option>
-    <option value="Peche">Pêche</option>
-    <option value="Militaire">Militaire</option>
-  </select>
+      <div class="form-group">
+        <label for="typeSelect">Type de port :</label>
+        <div class="input-wrapper">
+          <i class="fas fa-ship input-icon"></i>
+          <select id="typeSelect">
+            <option value="">Tous types</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Peche">Pêche</option>
+            <option value="Militaire">Militaire</option>
+          </select>
+        </div>
+      </div>
 
-  <label for="capacityInput">Capacité min (tonnes) :</label>
-  <input id="capacityInput" type="number" min="0" placeholder="0" />
+      <div class="form-group">
+        <label for="capacityInput">Capacité min (tonnes) :</label>
+        <div class="input-wrapper">
+          <i class="fas fa-weight-hanging input-icon"></i>
+          <input id="capacityInput" type="number" min="0" placeholder="Saisir un poids" />
+        </div>
+      </div>
 
-  <label for="searchInput">Recherche (nom ou ville) :</label>
-  <input id="searchInput" type="text" placeholder="Recherche..." />
+      <div class="form-group">
+        <label for="searchInput">Recherche :</label>
+        <div class="input-wrapper">
+          <i class="fas fa-search input-icon"></i>
+          <input id="searchInput" type="text" placeholder="Nom ou ville..." />
+        </div>
+      </div>
+    </div>
 
-  <div id="info">
-    <h3>Détails du port</h3>
-    <div id="portDetails">Cliquez sur un port pour voir les détails.</div>
+    <div id="info">
+      <h3>Détails du port</h3>
+      <div id="portDetails">
+        <div class="detail-item">
+          <div class="detail-icon"><i class="fas fa-anchor"></i></div>
+          <div>Cliquez sur un port pour voir les détails.</div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<div id="map"></div>
-<div id="routeInfo" style="margin-top:10px; font-size:14px; color:#333;"></div>
+  <div id="map"></div>
+  <div id="routeInfo" class="route-info-container"></div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-<script src="./static/js/script.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+  <script src="./static/js/script.js"></script>
 
 
 </body>
+
 </html>

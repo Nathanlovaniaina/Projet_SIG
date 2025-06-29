@@ -1,0 +1,274 @@
+    :root {
+      --bleu-ocean: #1a6ba1;
+      --bleu-clair: #4da8da;
+      --sable: #e6d5b8;
+      --terre-rouge: #b7410e;
+      --vert-tropical: #2e8b57;
+      --blanc-creme: #f5f5f0;
+      --sidebar-width: 320px;
+      --input-height: 38px;
+      --border-radius: 5px;
+      --spacing-unit: 15px;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--blanc-creme);
+    }
+
+    #map {
+      flex: 1;
+      filter: saturate(1.1);
+    }
+
+    #sidebar {
+      width: var(--sidebar-width);
+      padding: var(--spacing-unit);
+      background: linear-gradient(to bottom, var(--bleu-ocean), var(--bleu-clair));
+      color: white;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+      box-sizing: border-box;
+      /* Inclut padding dans le calcul de la largeur */
+    }
+
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-unit);
+    }
+
+    h2 {
+      color: var(--sable);
+      border-bottom: 2px solid var(--sable);
+      padding-bottom: 10px;
+      margin: 0 0 var(--spacing-unit) 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+    }
+
+    h2::before {
+      content: "\f21a";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+    }
+
+    h3 {
+      color: var(--sable);
+      margin: var(--spacing-unit) 0 calc(var(--spacing-unit)/2) 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
+    }
+
+    h3::before {
+      content: "\f05a";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 0.9em;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    label {
+      color: var(--blanc-creme);
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Icônes spécifiques pour chaque champ */
+    label[for="regionSelect"]::before {
+      content: "\f5a0";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    label[for="typeSelect"]::before {
+      content: "\f773";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    label[for="capacityInput"]::before {
+      content: "\f4d8";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    label[for="searchInput"]::before {
+      content: "\f002";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: var(--input-height);
+      padding: 0 10px 0 30px;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: var(--border-radius);
+      background-color: rgba(255, 255, 255, 0.95);
+      font-size: 0.9rem;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    /* Icônes dans les inputs */
+    .input-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--bleu-ocean);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a6ba1'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 12px;
+      padding-right: 25px;
+    }
+
+    #info {
+      margin-top: var(--spacing-unit);
+      border-top: 2px solid var(--sable);
+      padding-top: var(--spacing-unit);
+    }
+
+    #portDetails {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: var(--spacing-unit);
+      border-radius: var(--border-radius);
+      color: #333;
+      line-height: 1.5;
+      min-height: 150px;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    /* Style pour les détails avec icônes */
+    .detail-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      align-items: flex-start;
+    }
+
+    .detail-icon {
+      color: var(--bleu-ocean);
+      width: 16px;
+      text-align: center;
+      margin-top: 3px;
+      flex-shrink: 0;
+      font-size: 0.8rem;
+    }
+
+    /* Animation pour les filtres */
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--sable);
+      box-shadow: 0 0 0 2px rgba(230, 213, 184, 0.3);
+    }
+
+    /* Responsive pour petits écrans */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        height: auto;
+      }
+
+      #sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+      }
+
+      #map {
+        height: 50vh;
+      }
+
+      :root {
+        --sidebar-width: 100%;
+      }
+    }
+
+    .route-info-container {
+      position: absolute;
+      bottom: 20px;
+      left: 350px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px 15px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      max-width: 300px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .route-info-container::before {
+      content: "\f018";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      color: var(--bleu-ocean);
+    }
+
+    .itineraire-btn {
+      background-color: var(--terre-rouge);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      margin-top: 10px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+
+    .itineraire-btn:hover {
+      background-color: #9a360c;
+    }
+
+    .itineraire-info {
+      margin-top: 10px;
+      padding: 8px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: var(--border-radius);
+      font-size: 0.9rem;
+    }
+
+    
