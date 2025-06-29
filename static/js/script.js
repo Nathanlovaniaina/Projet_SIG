@@ -181,11 +181,6 @@ function afficherZonesEtRoutes(props) {
   ];
   window.zonesLayer = L.polygon(zoneCoords, { color: 'blue', weight: 2, fillOpacity: 0.1 }).addTo(map);
 
-  const routeCoords = [
-    [props.latitude, props.longitude],
-    [props.latitude + 0.2, props.longitude + 0.3]
-  ];
-  window.routesLayer = L.polyline(routeCoords, { color: 'red', dashArray: '5, 10' }).addTo(map);
 }
 
 // Écouteurs sur filtres
