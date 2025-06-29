@@ -81,10 +81,9 @@ let routingControl = null;  // Stocke le contrôle Leaflet Routing Machine
 
 // Modifier afficherDetails pour ajouter un bouton "Itinéraire"
 function afficherDetails(props) {
-  const photoUrl = props.photo
+    const photoUrl = props.photo
     ? `${image_path}${props.photo}`
     : "https://via.placeholder.com/300x150?text=Pas+d'image";
-
 
   portDetails.innerHTML = `
     <h4>${props.nom}</h4>
@@ -96,8 +95,8 @@ function afficherDetails(props) {
     <p><strong>Capacité :</strong> ${props.capacite || 'N/A'} tonnes</p>
     <p><strong>Gestionnaire :</strong> ${props.gestionnaire || 'N/A'}</p>
     <p><strong>Coordonnées :</strong> ${props.latitude.toFixed(5)}, ${props.longitude.toFixed(5)}</p>
-    <button id="btnItineraire">Itinéraire vers ce port</button>
-    <div id="itineraireInfo" style="margin-top:10px; font-weight:bold;"></div>
+    <button id="btnItineraire" class="itineraire-btn">Itinéraire vers ce port</button>
+    <div id="itineraireInfo" class="itineraire-info"></div>
   `;
 
   if (props.latitude && props.longitude) {
@@ -194,3 +193,5 @@ regionSelect.addEventListener('change', () => afficherPorts(portsData));
 typeSelect.addEventListener('change', () => afficherPorts(portsData));
 capacityInput.addEventListener('input', () => afficherPorts(portsData));
 searchInput.addEventListener('input', () => afficherPorts(portsData));
+
+
